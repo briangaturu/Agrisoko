@@ -2,31 +2,31 @@ import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
-    <section className="bg-gradient-to-b from-green-50 to-white">
+    <section className="bg-gradient-to-b from-green-50 via-white to-green-50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        
+
         {/* Left Content */}
         <div>
-          <span className="inline-block mb-4 px-4 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
+          <span className="inline-block mb-4 px-4 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full shadow-sm">
             🌱 Digital Agriculture Marketplace
           </span>
 
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
-            Connect Farmers & Buyers  
+            Connect Farmers & Buyers
             <span className="text-green-600"> Without Middlemen</span>
           </h1>
 
           <p className="mt-6 text-lg text-gray-600 max-w-xl">
             Buy and sell fresh farm produce directly from verified farmers.
             Chat in real time, access seasonal crop insights, and trade with
-            confidence — all in one platform.
+            confidence — all in one smart platform.
           </p>
 
           {/* CTA Buttons */}
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
             <Link
               to="/marketplace"
-              className="px-8 py-3 rounded-md bg-green-600 text-white text-base font-semibold hover:bg-green-700 transition text-center"
+              className="px-8 py-3 rounded-md bg-green-600 text-white text-base font-semibold hover:bg-green-700 transition text-center shadow-md"
             >
               Explore Marketplace
             </Link>
@@ -39,7 +39,7 @@ const Hero = () => {
             </Link>
           </div>
 
-          {/* Trust Indicators */}
+          {/* Stats */}
           <div className="mt-10 flex gap-8 text-sm text-gray-500">
             <div>
               <span className="block text-xl font-bold text-gray-900">100+</span>
@@ -56,19 +56,21 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Right Illustration */}
-        <div className="relative">
-          <div className="absolute -top-6 -left-6 w-32 h-32 bg-green-100 rounded-full blur-2xl"></div>
-          <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-green-200 rounded-full blur-2xl"></div>
+        {/* Right Image (No Frame / No Background) */}
+        <div className="relative flex justify-center">
 
-          <div className="relative bg-white rounded-2xl shadow-xl p-6">
-            <img
-              src="/images/farm-marketplace.png"
-              alt="Farm produce marketplace"
-              className="rounded-xl w-full"
-            />
-          </div>
+          {/* Soft Glow */}
+          <div className="absolute -top-12 -left-12 w-40 h-40 bg-green-200 blur-3xl opacity-60"></div>
+          <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-green-300 blur-3xl opacity-60"></div>
+
+          {/* Image Only */}
+          <img
+            src="https://images.unsplash.com/photo-1542838132-92c53300491e"
+            alt="Fresh farm produce"
+            className="relative w-full max-w-lg object-cover rounded-xl shadow-lg hover:scale-105 transition-transform duration-500"
+          />
         </div>
+
       </div>
     </section>
   );

@@ -1,9 +1,9 @@
-import Navbar from "../components/Navbar";
+import Header from "../components/Header";
 
 const Contact = () => {
   return (
     <>
-      <Navbar />
+      <Header />
 
       {/* Hero Section */}
       <div className="bg-green-600 text-white py-12">

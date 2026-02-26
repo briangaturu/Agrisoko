@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar";
+import Header from "../components/Header";
 import AboutHero from "../components/About/AboutHero";
 import MissionVision from "../components/About/MissionVision";
 import ProblemSolution from "../components/About/ProblemSolution";
@@ -8,7 +8,7 @@ import HowPlatformHelps from "../components/About/HowPlatformHelps";
 const About = () => {
   return (
     <div>
-        <Navbar />
+        <Header />
       <AboutHero />
       <MissionVision />
       <ProblemSolution />

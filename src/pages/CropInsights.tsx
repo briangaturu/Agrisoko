@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar";
+import Header from "../components/Header";
 import InsightsHero from "../components/Insights/InsightsHero";
 import InsightsFilters from "../components/Insights/InsightsFilter";
 import InsightsGrid from "../components/Insights/InsightsGrid";
@@ -6,7 +6,7 @@ import InsightsGrid from "../components/Insights/InsightsGrid";
 const CropInsights = () => {
   return (
     <>
-      <Navbar />
+      <Header />
 
       {/* Hero Section */}
       <InsightsHero />

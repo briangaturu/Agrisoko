@@ -11,22 +11,47 @@ interface CropCardProps {
 
 const CropCard = ({ name, image, price, quantity, farmer }: CropCardProps) => {
   return (
-    <div className="bg-white rounded-lg shadow p-4 flex flex-col">
-      <img
-        src={image}
-        alt={name}
-        className="w-full h-40 object-cover rounded-md mb-4"
-      />
-      <h3 className="font-bold text-lg">{name}</h3>
-      <p className="text-gray-600">Farmer: {farmer}</p>
-      <p className="text-gray-700 font-semibold mt-1">KES {price}</p>
-      <p className="text-gray-500">Available: {quantity} kg</p>
-      <Link
-        to={`/chat/${farmer}`}
-        className="mt-auto block text-center py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-      >
-        Contact Farmer
-      </Link>
+    <div className="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
+      
+      {/* Image */}
+      <div className="relative h-48">
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="p-5 flex flex-col flex-1">
+        
+        {/* Title + Price */}
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="font-bold text-lg text-gray-900">{name}</h3>
+
+          <span className="text-lg font-bold text-green-600">
+            KES {price}
+          </span>
+        </div>
+
+        {/* Farmer */}
+        <p className="text-sm text-gray-600 mb-1">
+          Farmer: <span className="font-medium">{farmer}</span>
+        </p>
+
+        {/* Quantity */}
+        <p className="text-sm text-gray-500 mb-4">
+          Available: {quantity} kg
+        </p>
+
+        {/* Button */}
+        <Link
+          to={`/chat/${farmer}`}
+          className="mt-auto block text-center py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
+        >
+          Contact Farmer
+        </Link>
+      </div>
     </div>
   );
 };

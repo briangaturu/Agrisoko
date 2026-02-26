@@ -27,8 +27,8 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-2">
             <NavLink
               to="/"
-className={({ isActive }: { isActive: boolean }) =>
-                 `${baseLink} ${isActive ? activeLink : inactiveLink}`
+              className={({ isActive }) =>
+                `${baseLink} ${isActive ? activeLink : inactiveLink}`
               }
             >
               Home
@@ -36,8 +36,8 @@ className={({ isActive }: { isActive: boolean }) =>
 
             <NavLink
               to="/marketplace"
-className={({ isActive }: { isActive: boolean }) =>
-                 `${baseLink} ${isActive ? activeLink : inactiveLink}`
+              className={({ isActive }) =>
+                `${baseLink} ${isActive ? activeLink : inactiveLink}`
               }
             >
               Marketplace
@@ -45,8 +45,8 @@ className={({ isActive }: { isActive: boolean }) =>
 
             <NavLink
               to="/insights"
-className={({ isActive }: { isActive: boolean }) =>
-                 `${baseLink} ${isActive ? activeLink : inactiveLink}`
+              className={({ isActive }) =>
+                `${baseLink} ${isActive ? activeLink : inactiveLink}`
               }
             >
               Crop Insights
@@ -54,8 +54,8 @@ className={({ isActive }: { isActive: boolean }) =>
 
             <NavLink
               to="/about"
-className={({ isActive }: { isActive: boolean }) =>
-                 `${baseLink} ${isActive ? activeLink : inactiveLink}`
+              className={({ isActive }) =>
+                `${baseLink} ${isActive ? activeLink : inactiveLink}`
               }
             >
               About
@@ -63,29 +63,12 @@ className={({ isActive }: { isActive: boolean }) =>
 
             <NavLink
               to="/contact"
-className={({ isActive }: { isActive: boolean }) =>
-                 `${baseLink} ${isActive ? activeLink : inactiveLink}`
+              className={({ isActive }) =>
+                `${baseLink} ${isActive ? activeLink : inactiveLink}`
               }
             >
               Contact
             </NavLink>
-
-            {/* Auth Buttons */}
-            <div className="ml-4 flex gap-2">
-              <Link
-                to="/login"
-                className="px-4 py-2 text-sm font-semibold text-green-700 border border-green-600 rounded-md hover:bg-green-50"
-              >
-                Login
-              </Link>
-
-              <Link
-                to="/register"
-                className="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-md hover:bg-green-700"
-              >
-                Register
-              </Link>
-            </div>
           </div>
 
           {/* Mobile Toggle */}
@@ -105,7 +88,7 @@ className={({ isActive }: { isActive: boolean }) =>
           <NavLink
             to="/"
             onClick={() => setOpen(false)}
-            className={({ isActive }: { isActive: boolean }) =>
+            className={({ isActive }) =>
               `${baseLink} ${isActive ? activeLink : inactiveLink}`
             }
           >
@@ -115,7 +98,7 @@ className={({ isActive }: { isActive: boolean }) =>
           <NavLink
             to="/marketplace"
             onClick={() => setOpen(false)}
-            className={({ isActive }: { isActive: boolean }) =>
+            className={({ isActive }) =>
               `${baseLink} ${isActive ? activeLink : inactiveLink}`
             }
           >
@@ -125,7 +108,7 @@ className={({ isActive }: { isActive: boolean }) =>
           <NavLink
             to="/insights"
             onClick={() => setOpen(false)}
-            className={({ isActive }: { isActive: boolean }) =>
+            className={({ isActive }) =>
               `${baseLink} ${isActive ? activeLink : inactiveLink}`
             }
           >
@@ -135,7 +118,7 @@ className={({ isActive }: { isActive: boolean }) =>
           <NavLink
             to="/about"
             onClick={() => setOpen(false)}
-            className={({ isActive }: { isActive: boolean }) =>
+            className={({ isActive }) =>
               `${baseLink} ${isActive ? activeLink : inactiveLink}`
             }
           >
@@ -145,31 +128,12 @@ className={({ isActive }: { isActive: boolean }) =>
           <NavLink
             to="/contact"
             onClick={() => setOpen(false)}
-            className={({ isActive }: { isActive: boolean }) =>
+            className={({ isActive }) =>
               `${baseLink} ${isActive ? activeLink : inactiveLink}`
             }
           >
             Contact
           </NavLink>
-
-          {/* Mobile Auth */}
-          <div className="pt-3 space-y-2">
-            <Link
-              to="/login"
-              onClick={() => setOpen(false)}
-              className="block w-full text-center py-2 border border-green-600 text-green-700 rounded-md hover:bg-green-50"
-            >
-              Login
-            </Link>
-
-            <Link
-              to="/register"
-              onClick={() => setOpen(false)}
-              className="block w-full text-center py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-            >
-              Register
-            </Link>
-          </div>
         </div>
       )}
     </nav>
