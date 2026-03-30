@@ -23,21 +23,27 @@ const Login = () => {
 
     try {
       const res = await loginUser(data).unwrap();
+      
 
-      // Your backend returns: { token, userId, email }
+     
       dispatch(
         setCredentials({
           token: res.token,
-          userId: res.userId,
-          email: res.email,
-          fullName: res.fullName, // optional, only if your backend sends it
+          userId: res.user.userId,
+          email: res.user.email,
+          fullName: res.user.fullName, 
+          role: res.user.role, 
         })
       );
 
       toast.success("Login successful", { id: loadingId });
 
-      // ✅ Redirect to your dashboard (change if your route is different)
-      navigate("/dashboard/me");
+      //  Redirect to dashboard based on role
+      if (res.user.role === "FARMER") {
+        navigate("/farmer-dashboard");
+      } else {
+        navigate("/dashboard/me");
+      }
     } catch (err: any) {
       const msg =
         err?.data?.error ||

@@ -36,6 +36,8 @@ const UserProfile = () => {
     refetch,
   } = useGetUserByIdQuery(userId as string, { skip: !userId });
 
+ 
+
   // depending on your backend response shape:
   // { message, data: user }
   const userData = userRes?.data;

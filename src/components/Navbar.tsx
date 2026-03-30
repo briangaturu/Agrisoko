@@ -69,6 +69,15 @@ const Navbar = () => {
             >
               Contact
             </NavLink>
+
+            <NavLink
+              to="/farmer-dashboard"
+              className={({ isActive }) =>
+                `${baseLink} ${isActive ? activeLink : inactiveLink}`
+              }
+            >
+              Farmer Dashboard
+            </NavLink>
           </div>
 
           {/* Mobile Toggle */}
@@ -133,6 +142,16 @@ const Navbar = () => {
             }
           >
             Contact
+          </NavLink>
+
+          <NavLink
+            to="/farmer-dashboard"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `${baseLink} ${isActive ? activeLink : inactiveLink}`
+            }
+          >
+            Farmer Dashboard
           </NavLink>
         </div>
       )}

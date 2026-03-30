@@ -3,7 +3,8 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 interface UserInfo {
   userId: string;
   email: string;
-  
+  fullName?: string;
+  role?: string;
 }
 
 interface AuthState {
@@ -30,13 +31,15 @@ const authSlice = createSlice({
         token: string;
         userId: string;
         email: string;
-        fullName: string;
+        fullName?: string;
+        role?: string;
       }>
     ) => {
       state.user = {
         userId: action.payload.userId,
         email: action.payload.email,
-        
+        fullName: action.payload.fullName,
+        role: action.payload.role,
       };
 
       state.token = action.payload.token;

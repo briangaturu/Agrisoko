@@ -3,24 +3,28 @@ import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
 import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from "redux-persist";
 
-import authReducer from "../features/auth/authSlice"; // ✅ adjust if your path differs
-import { userApi } from "../features/api/userApi"; // ✅ adjust if your path differs
+import authReducer from "../features/auth/authSlice";
+import { userApi } from "../features/api/userApi";
+import { cropApi } from "../features/api/cropApi";
+import { listingsApi } from "../features/api/listingsApi";
+import { ordersApi } from "../features/api/ordersApi";
+import { paymentsApi } from "../features/api/paymentsApi"; // ✅ add this
 
-// Persist config for auth
 const authPersistConfig = {
   key: "auth",
   storage,
-  whitelist: ["user", "token", "isAuthenticated"], // ✅ matches your updated authSlice
+  whitelist: ["user", "token", "isAuthenticated"],
 };
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 
 export const store = configureStore({
   reducer: {
-    // ✅ RTK Query reducer (this fixes state.userApi error)
     [userApi.reducerPath]: userApi.reducer,
-
-    // ✅ persisted auth reducer
+    [cropApi.reducerPath]: cropApi.reducer,
+    [listingsApi.reducerPath]: listingsApi.reducer,
+    [ordersApi.reducerPath]: ordersApi.reducer,
+    [paymentsApi.reducerPath]: paymentsApi.reducer, // ✅ add this
     auth: persistedAuthReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -28,7 +32,13 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(userApi.middleware),
+    }).concat(
+      userApi.middleware,
+      cropApi.middleware,
+      listingsApi.middleware,
+      ordersApi.middleware,
+      paymentsApi.middleware, // ✅ add this
+    ),
 });
 
 export const persistor = persistStore(store);
