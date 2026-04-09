@@ -6,7 +6,7 @@ const MarketplaceGrid = () => {
   const { data, isLoading, isError } = useGetListingsQuery(undefined);
 
   const listings = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
-
+console.log("listing sample:", listings[0]);
   if (isLoading) {
     return <p className="text-center py-10">Loading crops...</p>;
   }
@@ -32,7 +32,7 @@ const MarketplaceGrid = () => {
       {listings.map((listing: any) => (
        <CropCard
   key={listing.id}
-  listingId={listing.id}        // ✅ add this
+  listingId={listing.id}       
   name={listing.crop?.name || "Unknown Crop"}
   image={listing.crop?.cropUrl || ""}
   price={Number(listing.pricePerUnit)}
@@ -42,8 +42,11 @@ const MarketplaceGrid = () => {
   phone={listing.farmer?.phone || "Not provided"}
   location={listing.location}
   description={listing.description}
+  farmerId={listing.farmer?.userId}
 />
+
       ))}
+      
     </div>
   );
 };

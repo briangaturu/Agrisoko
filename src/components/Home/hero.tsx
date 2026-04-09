@@ -2,13 +2,17 @@ import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
-    <section className="bg-gradient-to-b from-green-50 via-white to-green-50 overflow-hidden">
+    <section className="py-5 bg-gradient-to-b from-green-600 via-white to-green-100 relative overflow-hidden">
+      {/* Soft animated glows */}
+      <div className="absolute -top-10 -left-10 w-72 h-72 bg-white/10 rounded-full animate-pulseSlow"></div>
+      <div className="absolute -bottom-16 -right-16 w-96 h-96 bg-white/5 rounded-full animate-pulseSlow"></div>
+      
       <div className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
         {/* Left Content */}
         <div>
           <span className="inline-block mb-4 px-4 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full shadow-sm">
-            🌱 Digital Agriculture Marketplace
+             Digital Agriculture Marketplace
           </span>
 
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">

@@ -5,20 +5,20 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   const baseLink =
-    "block px-3 py-2 rounded-md text-sm font-medium transition";
-  const activeLink = "text-green-700 bg-green-100";
+    "block px-3 py-2 rounded-md text-sm font-medium transition-all duration-300";
+  const activeLink = "text-white bg-white/30 shadow-inner backdrop-blur";
   const inactiveLink =
-    "text-gray-700 hover:bg-green-50 hover:text-green-700";
+    "text-white/90 hover:text-white hover:bg-white/20 hover:scale-105";
 
   return (
-    <nav className="bg-white border-b shadow-sm sticky top-0 z-50">
+    <nav className="navbar-gradient sticky top-0 z-50 border-b border-white/30 shadow-lg">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16 items-center">
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-2xl">🌱</span>
-            <span className="font-bold text-lg text-green-700">
+            <span className="text-2xl animate-pulse">🌱</span>
+            <span className="font-bold text-lg text-white drop-shadow-lg">
               AgriSoko
             </span>
           </Link>
@@ -93,7 +93,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden px-4 pb-4 space-y-1 bg-white border-t">
+        <div className="md:hidden px-4 pb-4 space-y-1 bg-white/90 backdrop-blur border-t border-white/40 animate-fade-in">
           <NavLink
             to="/"
             onClick={() => setOpen(false)}

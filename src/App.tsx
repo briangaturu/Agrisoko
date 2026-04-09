@@ -1,4 +1,6 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Toaster } from "react-hot-toast"; 
+
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Login from "./pages/Login";
@@ -15,18 +17,21 @@ import { FarmerLayout } from "./dashboardDesign/farmerLayout";
 import Payments from "./components/dashboard/payments";
 import Orders from "./components/dashboard/orders";
 import Crops from "./components/dashboard/crops";
-import ListingsPage from "./components/dashboard/listingsPage"; // ✅ add this
+import ListingsPage from "./components/dashboard/listingsPage";
 import BuyerOrdersPage from "./components/dashboard/buyerOrders";
+import NotificationsPage from "./pages/NotificationsPage";
+import ChatList from "./pages/ChatList";
+import Chat from "./pages/Chat";
 
 const App = () => {
   const router = createBrowserRouter([
-    { path: "/",          element: <Home /> },
-    { path: "/about",     element: <About /> },
-    { path: "/login",     element: <Login /> },
-    { path: "/register",  element: <Register /> },
+    { path: "/", element: <Home /> },
+    { path: "/about", element: <About /> },
+    { path: "/login", element: <Login /> },
+    { path: "/register", element: <Register /> },
     { path: "/marketplace", element: <Marketplace /> },
-    { path: "/insights",  element: <CropInsights /> },
-    { path: "/contact",   element: <Contact /> },
+    { path: "/insights", element: <CropInsights /> },
+    { path: "/contact", element: <Contact /> },
 
     {
       path: "dashboard",
@@ -38,8 +43,11 @@ const App = () => {
       errorElement: <NotFound />,
       children: [
         { path: "me", element: <UserProfile /> },
-        { path: "orders",   element: <BuyerOrdersPage /> },
-    { path: "payments", element: <Payments /> }, 
+        { path: "orders", element: <BuyerOrdersPage /> },
+        { path: "payments", element: <Payments /> },
+        { path: "chat", element: <ChatList /> },
+        { path: "chat/:userId", element: <Chat /> },
+        { path: "notifications", element: <NotificationsPage /> },
       ],
     },
 
@@ -52,17 +60,25 @@ const App = () => {
       ),
       errorElement: <NotFound />,
       children: [
-        { index: true,      element: <FarmerDashboard /> },
-        { path: "me",       element: <UserProfile /> },
-        { path: "crops",    element: <Crops /> },
-        { path: "listings", element: <ListingsPage /> }, // ✅ add this
-        { path: "orders",   element: <Orders /> },
+        { index: true, element: <FarmerDashboard /> },
+        { path: "me", element: <UserProfile /> },
+        { path: "crops", element: <Crops /> },
+        { path: "listings", element: <ListingsPage /> },
+        { path: "orders", element: <Orders /> },
         { path: "payments", element: <Payments /> },
+        { path: "chat", element: <ChatList /> },
+        { path: "chat/:userId", element: <Chat /> },
+        { path: "notifications", element: <NotificationsPage /> },
       ],
     },
   ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" reverseOrder={false} />
+    </>
+  );
 };
 
 export default App;

@@ -6,7 +6,7 @@ const produce = [
 
 const FeaturedProduce = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-green-50 via-white to-green-50">
+    <section className="py-20 bg-gradient-to-b from-green-600 via-white to-green-100">
       <div className="max-w-7xl mx-auto px-6">
 
         {/* Title */}

@@ -1,6 +1,6 @@
 const CropInsightsPreview = () => {
     return (
-      <section className="py-20 bg-green-50">
+      <section className="py-20 bg-gradient-to-b from-green-600 via-white to-green-100 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <h2 className="text-3xl font-bold text-gray-900">

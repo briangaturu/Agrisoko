@@ -1,21 +1,18 @@
 import { Outlet } from 'react-router-dom'
 import Card from './card'
-import { SideNav } from './sideNav'
+import { TopNav } from './sideNav'  // ← make sure this export name matches
 
-
-export const  Layout =() =>{
+export const Layout = () => {
     return (
-        <div className='flex max-h-fit min-h-full bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 '>
-            <div className='min-w-[12%]  '>
-                <SideNav />
-            </div>
-            <div className='flex flex-col min-w-[80%] '>
-                <div className="h-fit">
+        <div className='min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100'>
+            <div className='flex flex-col min-h-screen'>
+                <TopNav />
+                <main className='flex-1 p-4 md:p-6 w-full'>
                     <Card>
                         <Outlet />
                     </Card>
-                </div>
+                </main>
             </div>
         </div>
-    )
-}
+    );
+};

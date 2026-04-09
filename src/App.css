@@ -1,2 +1,74 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
+
+.navbar-gradient {
+  background: linear-gradient(90deg, #0f766e, #22c55e, #4ade80, #16a34a);
+  background-size: 300% 300%;
+  animation: gradientBackground 10s ease infinite;
+}
+
+@keyframes gradientBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-0.5rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 220ms ease-out;
+}
+
+/* Global responsive helpers */
+* { box-sizing: border-box; }
+body {
+  min-width: 320px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* Make main containers fluid with safe padding on smaller screens */
+.max-w-7xl {
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .max-w-7xl {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .max-w-7xl {
+    max-width: 74rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .text-4xl { font-size: 2rem; }
+  .text-5xl { font-size: 2.25rem; }
+  .h-16 { min-height: 3.5rem; }
+}
+
+/* dashboard side nav enhancements */
+.dashboard-nav-item {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.dashboard-nav-item:hover {
+  transform: translateX(2px);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-nav-item { font-size: 0.95rem; }
+}
+
+
+
+

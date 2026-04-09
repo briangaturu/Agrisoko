@@ -3,6 +3,11 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../app/store";
 import { clearCredentials } from "../features/auth/authSlice";
+import NotificationBell from "./NotificationsBell";
+
+
+// ✅ Import your logo
+import logo from "../assets/logo.png";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -33,8 +38,8 @@ const Header = () => {
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-2xl">🌱</span>
-            <span className="font-bold text-lg text-green-700">AgriSoko</span>
+            <img src={logo} alt="AgriSoko Logo" className="h-10 w-auto" />
+            
           </Link>
 
           {/* Desktop Menu */}
@@ -99,7 +104,6 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              // ✅ Login + Register buttons when logged out
               <div className="flex items-center gap-2 ml-2">
                 <Link
                   to="/login"
@@ -115,6 +119,11 @@ const Header = () => {
                 </Link>
               </div>
             )}
+          </div>
+
+          <div className="flex items-center gap-2 ml-2">
+            {isAuthenticated && <NotificationBell />}
+            <div className="relative">{/* ... existing dropdown ... */}</div>
           </div>
 
           {/* Mobile Toggle */}
@@ -167,7 +176,6 @@ const Header = () => {
               </button>
             </div>
           ) : (
-            // ✅ Login + Register buttons on mobile when logged out
             <div className="pt-2 space-y-2">
               <Link
                 to="/login"

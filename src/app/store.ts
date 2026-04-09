@@ -9,6 +9,8 @@ import { cropApi } from "../features/api/cropApi";
 import { listingsApi } from "../features/api/listingsApi";
 import { ordersApi } from "../features/api/ordersApi";
 import { paymentsApi } from "../features/api/paymentsApi"; // ✅ add this
+import { notificationsApi } from "../features/api/notificationsApi";
+import { conversationsApi } from "../features/api/conversationsApi";
 
 const authPersistConfig = {
   key: "auth",
@@ -24,7 +26,9 @@ export const store = configureStore({
     [cropApi.reducerPath]: cropApi.reducer,
     [listingsApi.reducerPath]: listingsApi.reducer,
     [ordersApi.reducerPath]: ordersApi.reducer,
-    [paymentsApi.reducerPath]: paymentsApi.reducer, // ✅ add this
+    [paymentsApi.reducerPath]: paymentsApi.reducer, 
+    [notificationsApi.reducerPath]: notificationsApi.reducer,
+    [conversationsApi.reducerPath]: conversationsApi.reducer,
     auth: persistedAuthReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -37,7 +41,9 @@ export const store = configureStore({
       cropApi.middleware,
       listingsApi.middleware,
       ordersApi.middleware,
-      paymentsApi.middleware, // ✅ add this
+      paymentsApi.middleware, 
+      notificationsApi.middleware,
+      conversationsApi.middleware,
     ),
 });
 

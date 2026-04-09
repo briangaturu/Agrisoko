@@ -1,81 +1,84 @@
-import { SquareUserRound, LogOut } from "lucide-react";
+import { SquareUserRound, LogOut, Bell, MessageCircle, Home } from "lucide-react";
 import { FaDollarSign } from "react-icons/fa";
 import { FaShop } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-export const SideNav = () => {
+interface TopNavProps {
+  onLogout?: () => void;
+}
+
+export const TopNav = ({ onLogout }: TopNavProps) => {
+  const location = useLocation();
+
+  const NAV_ITEMS = [
+    { to: "me",            label: "My Profile",    icon: SquareUserRound },
+    { to: "orders",        label: "Orders",        icon: FaShop          },
+    { to: "payments",      label: "Payments",      icon: FaDollarSign    },
+    { to: "/",             label: "Home",          icon: Home            },
+    { to: "chat",          label: "Chat",          icon: MessageCircle   },
+    { to: "notifications", label: "Notifications", icon: Bell            },
+  ];
+
+  const isActive = (to: string) =>
+    location.pathname === to || location.pathname.includes(to);
+
   return (
-    <ul className="menu bg-green-600 text-white shadow-lg min-w-full gap-2 min-h-full p-3">
-
-      {/* Profile */}
-      <li>
-        <Link
-          to="me"
-          className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-green-700 transition"
-        >
-          <SquareUserRound className="text-white" />
-          My Profile
-        </Link>
-      </li>
-
-      {/* Orders */}
-      <li>
-        <Link
-          to="orders"
-          className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-green-700 transition"
-        >
-          <FaShop className="text-white" />
-          Orders
-        </Link>
-      </li>
-
-      {/* Payments */}
-      <li>
-        <Link
-          to="payments"
-          className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-green-700 transition"
-        >
-          <FaDollarSign className="text-white" />
-          Payments
-        </Link>
-      </li>
-
-      {/* Home */}
-      <li>
-        <Link
-          to="/"
-          className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-green-700 transition"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-white"
+    <>
+      {/* ── Desktop: full-width green gradient bar ── */}
+      <div className="hidden md:block w-full bg-gradient-to-r from-green-500 via-green-600 to-green-700 shadow-sm">
+        <div className="flex items-center justify-between px-6 py-2">
+          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                isActive(to)
+                  ? "bg-white text-green-700 shadow-sm"
+                  : "text-white hover:bg-white/10"
+              }`}
+            >
+              <Icon size={15} />
+              <span>{label}</span>
+            </Link>
+          ))}
+          <Link
+            to="#"
+            onClick={onLogout}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-red-200 hover:bg-red-500/80 hover:text-white transition-all"
           >
-            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          </svg>
-          Home
-        </Link>
-      </li>
+            <LogOut size={15} />
+            <span>Logout</span>
+          </Link>
+        </div>
+      </div>
 
-      {/* Logout */}
-      <li className="mt-auto">
-        <Link
-          to="#"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-red-200 hover:bg-red-600 hover:text-white transition"
-        >
-          <LogOut />
-          Logout
-        </Link>
-      </li>
-
-    </ul>
+      {/* ── Mobile: scrollable pill tab row ── */}
+      <div className="md:hidden bg-white border-b shadow-sm px-3 py-2">
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto scrollbar-hide">
+          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`flex-shrink-0 flex items-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
+                isActive(to)
+                  ? "bg-white text-green-700 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <Icon size={13} />
+              <span>{label}</span>
+            </Link>
+          ))}
+          <Link
+            to="#"
+            onClick={onLogout}
+            className="flex-shrink-0 flex items-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 transition-all"
+          >
+            <LogOut size={13} />
+            <span>Logout</span>
+          </Link>
+        </div>
+      </div>
+    </>
   );
 };

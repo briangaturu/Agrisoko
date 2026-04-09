@@ -6,7 +6,11 @@ const Contact = () => {
       <Header />
 
       {/* Hero Section */}
-      <div className="bg-green-600 text-white py-12">
+      <div className="bg-gradient-to-r from-green-600 via-emerald-500 to-emerald-600 text-white py-20 relative overflow-hidden">
+
+      {/* Decorative animated circles */}
+      <div className="absolute -top-10 -left-10 w-72 h-72 bg-white/10 rounded-full animate-pulseSlow"></div>
+      <div className="absolute -bottom-16 -right-16 w-96 h-96 bg-white/5 rounded-full animate-pulseSlow"></div>
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Contact Us

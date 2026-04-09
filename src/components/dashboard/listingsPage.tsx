@@ -4,6 +4,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { Plus, Pencil, Trash2, PackageSearch } from "lucide-react";
 import { FaTimes } from "react-icons/fa";
 import { SaveIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 import type { RootState } from "../../app/store";
 import { useGetCropsQuery } from "../../features/api/cropApi";
@@ -30,11 +31,13 @@ const ListingsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingListing, setEditingListing] = useState<any>(null);
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [listingToDelete, setListingToDelete] = useState<any>(null);
+
   const { data: cropsRes } = useGetCropsQuery(undefined);
   const allCrops = cropsRes?.data ?? cropsRes ?? [];
 
   const { data: listingsRes, isLoading } = useGetListingsQuery(undefined);
-  console.log("raw listings:", listingsRes);
   const allListings = listingsRes?.data ?? [];
   const myListings = allListings.filter(
     (l: any) => l.farmerId === farmerId || l.farmer?.userId === farmerId
@@ -78,23 +81,38 @@ const ListingsPage = () => {
     try {
       if (editingListing) {
         await updateListing({ id: editingListing.id, ...data }).unwrap();
+        toast.success("Listing updated successfully!");
       } else {
         await createListing({ ...data, farmerId }).unwrap();
+        toast.success("Listing created successfully!");
       }
       setIsModalOpen(false);
     } catch (err: any) {
-      alert(err?.data?.error || err?.message || "Failed to save listing");
+      toast.error(err?.data?.error || err?.message || "Failed to save listing");
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this listing?")) return;
-    try {
-      await deleteListing(id).unwrap();
-    } catch {
-      alert("Failed to delete listing");
-    }
+  const handleDeleteClick = (listing: any) => {
+    setListingToDelete(listing);
+    setIsDeleteModalOpen(true);
   };
+
+  const confirmDelete = async () => {
+  if (!listingToDelete) return;
+  try {
+    await deleteListing(listingToDelete.id).unwrap();
+    toast.success("Listing deleted successfully!");
+    setIsDeleteModalOpen(false);
+    setListingToDelete(null);
+  } catch (err: any) {
+    if (err?.data?.code === "23503") {
+      // Postgres foreign key violation code
+      toast.error("Cannot delete this listing because it has existing orders.");
+    } else {
+      toast.error(err?.data?.error || "Failed to delete listing");
+    }
+  }
+};
 
   const isBusy = isCreating || isUpdating;
 
@@ -163,7 +181,7 @@ const ListingsPage = () => {
                     <Pencil size={14} /> Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(listing.id)}
+                    onClick={() => handleDeleteClick(listing)}
                     className="flex-1 flex items-center justify-center gap-1 py-1.5 text-sm bg-red-50 hover:bg-red-100 rounded-md transition font-medium text-red-600"
                   >
                     <Trash2 size={14} /> Delete
@@ -175,7 +193,7 @@ const ListingsPage = () => {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50">
           <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto">
@@ -187,7 +205,6 @@ const ListingsPage = () => {
                 <FaTimes />
               </button>
             </div>
-
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Crop Picker */}
               <div>
@@ -204,11 +221,6 @@ const ListingsPage = () => {
                   ))}
                 </select>
                 {errors.cropId && <p className="text-red-600 text-sm mt-1">{errors.cropId.message}</p>}
-                {allCrops.length === 0 && (
-                  <p className="text-amber-600 text-sm mt-1">
-                    No crops found. Please add crops first in the Crops page.
-                  </p>
-                )}
               </div>
 
               {/* Price */}
@@ -266,7 +278,7 @@ const ListingsPage = () => {
                   {...register("status")}
                 >
                   <option value="ACTIVE">Active</option>
-                   <option value="SOLD">Sold</option>
+                  <option value="SOLD">Sold</option>
                   <option value="PAUSED">Paused</option>
                 </select>
               </div>
@@ -289,6 +301,37 @@ const ListingsPage = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {isDeleteModalOpen && listingToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50">
+          <div className="w-full max-w-sm bg-white rounded-xl shadow-lg p-6 max-h-[90vh]">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Confirm Delete</h2>
+            <p className="text-sm text-gray-700 mb-6">
+              Are you sure you want to delete <span className="font-semibold">{listingToDelete.crop?.name}</span> listing? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setListingToDelete(null);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm font-medium"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

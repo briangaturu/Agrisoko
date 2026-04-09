@@ -27,6 +27,7 @@ const KES_TO_USD = 130;
 
 interface CropCardProps {
   listingId: string | number;
+  farmerId?: string;        // ✅ added
   name: string;
   image: string;
   price?: number;
@@ -145,7 +146,7 @@ const CheckoutForm = ({ orderId, amount, onSuccess, onBack }: CheckoutFormProps)
 type ModalStep = "order" | "payment-options" | "stripe";
 type MpesaStep = "options" | "phone" | "pending";
 
-const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, location, description, unit }: CropCardProps) => {
+const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, phone, location, description, unit }: CropCardProps) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
@@ -174,8 +175,8 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
     setPlacedOrder(null);
     setOrderQty(1);
     setModalStep("order");
-    setMpesaStep("options"); // ✅ reset mpesa step
-    setMpesaPhone("");        // ✅ reset phone
+    setMpesaStep("options");
+    setMpesaPhone("");
   };
 
   const handlePlaceOrder = async () => {
@@ -200,10 +201,7 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
   };
 
   const handleMpesaPay = async () => {
-    if (!mpesaPhone) {
-      alert("Please enter your M-Pesa phone number.");
-      return;
-    }
+    if (!mpesaPhone) { alert("Please enter your M-Pesa phone number."); return; }
     if (!placedOrder) return;
     try {
       await initiateMpesaPayment({
@@ -257,13 +255,20 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
           {phone && <p className="text-sm text-gray-600 mb-3">Phone: <span className="font-medium">{phone}</span></p>}
           <p className="text-sm text-gray-500 mb-4">Available: {quantity} {unit ?? "kg"}</p>
 
-          <div className="mt-auto flex gap-2">
+          {/* ✅ Updated buttons */}
+          <div className="mt-auto flex flex-col gap-2">
             {farmer && (
-              <Link to={`/chat/${farmer}`} className="flex-1 block text-center py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition text-sm">
-                Contact Farmer
-              </Link>
-            )}
-            <button onClick={handleOrderClick} className="flex-1 py-2.5 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition text-sm">
+  <button
+    onClick={() => navigate(`/dashboard/chat/${farmerId}`)}
+    className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition"
+  >
+    🗨️ Contact Farmer
+  </button>
+)}
+            <button
+              onClick={handleOrderClick}
+              className="w-full py-2.5 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition text-sm"
+            >
               Order Now
             </button>
           </div>
@@ -276,19 +281,19 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
           <div className="w-full max-w-sm bg-white rounded-xl shadow-lg p-6">
 
             {/* Header */}
-            {/* Header */}
-<div className="flex items-center justify-between mb-4">
-  <h2 className="text-lg font-bold text-gray-800">
-    {modalStep === "order" && "Place Order"}
-    {modalStep === "payment-options" && mpesaStep === "options" && "Choose Payment"}
-    {modalStep === "payment-options" && mpesaStep === "phone" && "Pay with M-Pesa"}
-    {modalStep === "payment-options" && mpesaStep === "pending" && "Check Your Phone"}
-    {modalStep === "stripe" && "Pay with Card"}
-  </h2>
-  <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600">
-    <FaTimes />
-  </button>
-</div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800">
+                {modalStep === "order" && "Place Order"}
+                {modalStep === "payment-options" && mpesaStep === "options" && "Choose Payment"}
+                {modalStep === "payment-options" && mpesaStep === "phone" && "Pay with M-Pesa"}
+                {modalStep === "payment-options" && mpesaStep === "pending" && "Check Your Phone"}
+                {modalStep === "stripe" && "Pay with Card"}
+              </h2>
+              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600">
+                <FaTimes />
+              </button>
+            </div>
+
             {/* ── STEP 1: Order ── */}
             {modalStep === "order" && (
               <>
@@ -352,21 +357,14 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
                   <p className="text-xs text-gray-400 mt-1">Order #{placedOrder.id}</p>
                 </div>
 
-                {/* ── Payment options ── */}
                 {mpesaStep === "options" && (
                   <>
                     <p className="text-sm text-gray-600 font-medium mb-3 text-center">Choose a payment method:</p>
                     <div className="flex flex-col gap-3">
-                      <button
-                        onClick={() => setModalStep("stripe")}
-                        className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-                      >
+                      <button onClick={() => setModalStep("stripe")} className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
                         <CreditCard size={18} /> Pay with Card (Stripe)
                       </button>
-                      <button
-                        onClick={() => setMpesaStep("phone")}
-                        className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition"
-                      >
+                      <button onClick={() => setMpesaStep("phone")} className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition">
                         🇰🇪 Pay with M-Pesa
                       </button>
                       <button onClick={handleCloseModal} className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition">
@@ -376,7 +374,6 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
                   </>
                 )}
 
-                {/* ── M-Pesa phone input ── */}
                 {mpesaStep === "phone" && (
                   <>
                     <p className="text-sm text-gray-600 font-medium mb-3">Enter your M-Pesa phone number:</p>
@@ -388,16 +385,13 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
                       className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none mb-4"
                     />
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => setMpesaStep("options")}
-                        className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
-                      >
+                      <button onClick={() => setMpesaStep("options")} className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                         ← Back
                       </button>
                       <button
                         onClick={handleMpesaPay}
                         disabled={isMpesaLoading || !mpesaPhone}
-                        className="flex-1 py-2.5 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                        className="flex-1 py-2.5 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition disabled:opacity-60"
                       >
                         {isMpesaLoading ? "Sending..." : "Send STK Push"}
                       </button>
@@ -405,7 +399,6 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
                   </>
                 )}
 
-                {/* ── M-Pesa pending ── */}
                 {mpesaStep === "pending" && (
                   <div className="text-center py-4">
                     <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -416,16 +409,10 @@ const CropCard = ({ listingId, name, image, price, quantity, farmer, phone, loca
                       An M-Pesa prompt has been sent to <span className="font-semibold">{mpesaPhone}</span>. Enter your PIN to complete payment.
                     </p>
                     <div className="flex flex-col gap-2">
-                      <button
-                        onClick={handleCloseModal}
-                        className="w-full py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition"
-                      >
+                      <button onClick={handleCloseModal} className="w-full py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition">
                         Done
                       </button>
-                      <button
-                        onClick={() => setMpesaStep("phone")}
-                        className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition"
-                      >
+                      <button onClick={() => setMpesaStep("phone")} className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition">
                         Resend STK Push
                       </button>
                     </div>
