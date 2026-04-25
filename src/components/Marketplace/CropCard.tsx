@@ -27,7 +27,7 @@ const KES_TO_USD = 130;
 
 interface CropCardProps {
   listingId: string | number;
-  farmerId?: string;        // ✅ added
+  farmerId?: string;
   name: string;
   image: string;
   price?: number;
@@ -58,6 +58,13 @@ const CheckoutForm = ({ orderId, amount, onSuccess, onBack }: CheckoutFormProps)
 
   const handlePay = async () => {
     if (!stripe || !elements) return;
+
+    // ✅ Stripe-only minimum restriction
+    if (amount < 100) {
+      setErrorMsg("Minimum amount for card payments is KES 100.");
+      return;
+    }
+
     setIsProcessing(true);
     setErrorMsg(null);
 
@@ -86,6 +93,7 @@ const CheckoutForm = ({ orderId, amount, onSuccess, onBack }: CheckoutFormProps)
           transactionRef: paymentIntent.id,
           status: "SUCCESS",
         }).unwrap();
+
         onSuccess();
       }
     } catch (err: any) {
@@ -102,6 +110,13 @@ const CheckoutForm = ({ orderId, amount, onSuccess, onBack }: CheckoutFormProps)
         <p className="text-2xl font-bold text-green-700">KES {Number(amount).toLocaleString()}</p>
         <p className="text-xs text-gray-400 mt-1">≈ USD {amountInUSD}</p>
       </div>
+
+      {/* Stripe minimum warning */}
+      {amount < 100 && (
+        <p className="text-red-500 text-xs bg-red-50 px-3 py-2 rounded-md">
+          ⚠️ Card payments require a minimum of KES 100. Please use M-Pesa instead.
+        </p>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Card Details</label>
@@ -128,7 +143,7 @@ const CheckoutForm = ({ orderId, amount, onSuccess, onBack }: CheckoutFormProps)
         <button
           type="button"
           onClick={handlePay}
-          disabled={!stripe || isProcessing}
+          disabled={!stripe || isProcessing || amount < 100}
           className="flex-1 py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition disabled:opacity-60 flex items-center justify-center gap-2"
         >
           <CreditCard size={15} />
@@ -154,7 +169,7 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
   const [modalStep, setModalStep] = useState<ModalStep>("order");
   const [mpesaStep, setMpesaStep] = useState<MpesaStep>("options");
   const [orderQty, setOrderQty] = useState(1);
-  const [placedOrder, setPlacedOrder] = useState<{ id: string; amount: number } | null>(null);
+  const [placedOrder, setPlacedOrder] = useState<{ id: string; amount: number; farmerPhone: string } | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState("");
 
   const [createOrder, { isLoading }] = useCreateOrderMutation();
@@ -181,19 +196,23 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
 
   const handlePlaceOrder = async () => {
     if (!user?.userId) return;
+
     const totalAmount = (price ?? 0) * orderQty;
-    if (totalAmount < 100) {
-      alert("Minimum order amount is KES 100. Please increase your quantity.");
-      return;
-    }
+
     try {
       const res = await createOrder({
         buyerId: user.userId,
         totalAmount: totalAmount.toFixed(2),
         items: [{ listingId, quantity: orderQty, price: totalAmount.toFixed(2) }],
       }).unwrap();
+
       const orderId = res?.data?.id ?? res?.id;
-      setPlacedOrder({ id: orderId, amount: totalAmount });
+
+      setPlacedOrder({
+        id: orderId,
+        amount: totalAmount,
+        farmerPhone: phone ?? "", // ✅ farmer phone for B2C escrow
+      });
       setModalStep("payment-options");
     } catch (err: any) {
       alert(err?.data?.error || err?.message || "Failed to place order");
@@ -208,6 +227,7 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
         phone: mpesaPhone,
         amount: placedOrder.amount,
         orderId: placedOrder.id,
+        farmerPhone: placedOrder.farmerPhone, // ✅ pass farmer phone for escrow
       }).unwrap();
       setMpesaStep("pending");
     } catch (err: any) {
@@ -255,16 +275,15 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
           {phone && <p className="text-sm text-gray-600 mb-3">Phone: <span className="font-medium">{phone}</span></p>}
           <p className="text-sm text-gray-500 mb-4">Available: {quantity} {unit ?? "kg"}</p>
 
-          {/* ✅ Updated buttons */}
           <div className="mt-auto flex flex-col gap-2">
             {farmer && (
-  <button
-    onClick={() => navigate(`/dashboard/chat/${farmerId}`)}
-    className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition"
-  >
-    🗨️ Contact Farmer
-  </button>
-)}
+              <button
+                onClick={() => navigate(`/dashboard/chat/${farmerId}`)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition"
+              >
+                🗨️ Contact Farmer
+              </button>
+            )}
             <button
               onClick={handleOrderClick}
               className="w-full py-2.5 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition text-sm"
@@ -313,7 +332,7 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
                     className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-orange-400 focus:outline-none"
                   />
                   <p className="text-xs text-gray-400 mt-1">
-                    Min order: KES 100 · Max available: {quantity} {unit ?? "kg"}
+                    Max available: {quantity} {unit ?? "kg"}
                   </p>
                 </div>
 
@@ -327,9 +346,6 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
                   <div className="flex justify-between font-bold text-gray-800 mt-2 pt-2 border-t">
                     <span>Total</span><span>KES {totalAmount.toLocaleString()}</span>
                   </div>
-                  {totalAmount < 100 && totalAmount > 0 && (
-                    <p className="text-xs text-red-500 mt-2">⚠️ Total must be at least KES 100</p>
-                  )}
                 </div>
 
                 <div className="flex gap-2">
@@ -338,7 +354,7 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
                   </button>
                   <button
                     onClick={handlePlaceOrder}
-                    disabled={isLoading || orderQty < 1 || totalAmount < 100}
+                    disabled={isLoading || orderQty < 1}
                     className="flex-1 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition disabled:opacity-60"
                   >
                     {isLoading ? "Placing..." : "Confirm Order"}
@@ -350,23 +366,43 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
             {/* ── STEP 2: Payment options ── */}
             {modalStep === "payment-options" && placedOrder && (
               <>
-                <div className="bg-green-50 rounded-lg p-4 mb-5 text-center">
+                <div className="bg-green-50 rounded-lg p-4 mb-4 text-center">
                   <p className="text-xs text-gray-500 mb-1">Order placed successfully! ✅</p>
                   <p className="text-2xl font-bold text-green-700">KES {placedOrder.amount.toLocaleString()}</p>
                   <p className="text-xs text-gray-400 mt-1">≈ USD {(placedOrder.amount / KES_TO_USD).toFixed(2)}</p>
                   <p className="text-xs text-gray-400 mt-1">Order #{placedOrder.id}</p>
                 </div>
 
+                {/* Escrow notice */}
+                <div className="mb-4 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+                  <p className="text-xs text-blue-700">
+                    🔒 <span className="font-semibold">Secure Escrow:</span> Payment is held safely until you confirm receipt of your order.
+                  </p>
+                </div>
+
                 {mpesaStep === "options" && (
                   <>
                     <p className="text-sm text-gray-600 font-medium mb-3 text-center">Choose a payment method:</p>
                     <div className="flex flex-col gap-3">
-                      <button onClick={() => setModalStep("stripe")} className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
+                      {/* Stripe — show warning if below minimum */}
+                      <button
+                        onClick={() => setModalStep("stripe")}
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                      >
                         <CreditCard size={18} /> Pay with Card (Stripe)
+                        {placedOrder.amount < 100 && (
+                          <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded">Min KES 100</span>
+                        )}
                       </button>
-                      <button onClick={() => setMpesaStep("phone")} className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition">
+
+                      {/* M-Pesa — no minimum restriction */}
+                      <button
+                        onClick={() => setMpesaStep("phone")}
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition"
+                      >
                         🇰🇪 Pay with M-Pesa
                       </button>
+
                       <button onClick={handleCloseModal} className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition">
                         Pay Later
                       </button>
@@ -405,8 +441,11 @@ const CropCard = ({ listingId, farmerId, name, image, price, quantity, farmer, p
                       <span className="text-3xl">📱</span>
                     </div>
                     <h3 className="font-bold text-gray-800 mb-2">Check your phone!</h3>
-                    <p className="text-sm text-gray-500 mb-4">
+                    <p className="text-sm text-gray-500 mb-2">
                       An M-Pesa prompt has been sent to <span className="font-semibold">{mpesaPhone}</span>. Enter your PIN to complete payment.
+                    </p>
+                    <p className="text-xs text-blue-600 mb-4">
+                      🔒 Payment held securely until you confirm receipt.
                     </p>
                     <div className="flex flex-col gap-2">
                       <button onClick={handleCloseModal} className="w-full py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition">

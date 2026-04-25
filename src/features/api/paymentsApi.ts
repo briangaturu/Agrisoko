@@ -44,16 +44,17 @@ export const paymentsApi = createApi({
       invalidatesTags: ["payments"],
     }),
 
-   //mpesa
-initiateMpesaPayment: builder.mutation({
-  query: (payload) => ({
-    url: "/payments/mpesa/stk",
-    method: "POST",
-    body: payload, // { phone, amount, orderId }
-  }),
-}),
+    // INITIATE MPESA STK PUSH
+    // payload: { phone, amount, orderId, farmerPhone }
+    initiateMpesaPayment: builder.mutation({
+      query: (payload) => ({
+        url: "/payments/mpesa/stk",
+        method: "POST",
+        body: payload,
+      }),
+    }),
 
-    // CREATE STRIPE PAYMENT INTENT ✅
+    // CREATE STRIPE PAYMENT INTENT
     createStripeIntent: builder.mutation({
       query: (payload) => ({
         url: "/payments/stripe/intent",

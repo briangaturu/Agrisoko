@@ -1,5 +1,5 @@
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { Toaster } from "react-hot-toast"; 
+import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -9,19 +9,32 @@ import Marketplace from "./pages/Marketplace";
 import CropInsights from "./pages/CropInsights";
 import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
-import UserProfile from "./components/dashboard/userProfile";
+
 import FarmerDashboard from "./components/FarmerDashboard";
 import NotFound from "./pages/Error";
 import ProtectedRoute from "./components/protectedRoute";
 import { FarmerLayout } from "./dashboardDesign/farmerLayout";
-import Payments from "./components/dashboard/payments";
-import Orders from "./components/dashboard/orders";
-import Crops from "./components/dashboard/crops";
-import ListingsPage from "./components/dashboard/listingsPage";
-import BuyerOrdersPage from "./components/dashboard/buyerOrders";
+
 import NotificationsPage from "./pages/NotificationsPage";
 import ChatList from "./pages/ChatList";
 import Chat from "./pages/Chat";
+import UserProfile from "./components/UserDashboard/userProfile";
+import BuyerOrdersPage from "./components/UserDashboard/buyerOrders";
+import Payments from "./components/UserDashboard/payments";
+import Crops from "./components/FarmerDashboard/crops";
+import ListingsPage from "./components/FarmerDashboard/listingsPage";
+import Orders from "./components/FarmerDashboard/orders";
+
+// Admin
+import AdminLayout from "./dashboardDesign/adminLayout";
+import Analytics from "./adminDashboard/analytics";
+import AdminUsers from "./adminDashboard/users";
+import AdminOrders from "./adminDashboard/orders";
+import AdminCrops from "./adminDashboard/crops";
+import AdminListings from "./adminDashboard/listings";
+import AdminPayments from "./adminDashboard/payments";
+import Wallet from "./adminDashboard/wallet";
+
 
 const App = () => {
   const router = createBrowserRouter([
@@ -71,6 +84,29 @@ const App = () => {
         { path: "notifications", element: <NotificationsPage /> },
       ],
     },
+
+    {
+      path: "/admin",
+      element: (
+        <ProtectedRoute>
+          <AdminLayout />
+        </ProtectedRoute>
+      ),
+      errorElement: <NotFound />,
+      children: [
+        { index: true, element: <Navigate to="/admin/analytics" replace /> },
+        { path: "analytics", element: <Analytics /> },
+        { path: "users", element: <AdminUsers /> },
+        { path: "orders", element: <AdminOrders /> },
+        { path: "crops", element: <AdminCrops /> },
+        { path: "listings", element: <AdminListings /> },
+        { path: "payments", element: <AdminPayments /> },
+        { path: "wallet", element: <Wallet /> },
+
+      ],
+    },
+
+    { path: "*", element: <NotFound /> },
   ]);
 
   return (

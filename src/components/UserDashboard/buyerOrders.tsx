@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { ShoppingBag, CreditCard } from "lucide-react";
+import { ShoppingBag, CreditCard, CheckCircle, Clock, PackageCheck, Truck } from "lucide-react";
 import { FaTimes } from "react-icons/fa";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -11,15 +11,36 @@ import {
   useCreatePaymentMutation,
   useInitiateMpesaPaymentMutation,
 } from "../../features/api/paymentsApi";
+import { useConfirmOrderReceivedMutation } from "../../features/api/ordersApi";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string);
 const KES_TO_USD = 130;
 
 const statusColors: Record<string, string> = {
-  PENDING:   "bg-yellow-100 text-yellow-700",
-  PAID:      "bg-blue-100 text-blue-700",
-  DELIVERED: "bg-green-100 text-green-700",
+  PENDING: "bg-yellow-100 text-yellow-700",
+  PAID: "bg-blue-100 text-blue-700",
+  RECEIVED: "bg-indigo-100 text-indigo-700",
+  SHIPPED: "bg-orange-100 text-orange-700",
+  DELIVERED: "bg-orange-100 text-orange-700",
+  CONFIRMED: "bg-green-100 text-green-700",
   CANCELLED: "bg-red-100 text-red-700",
+  DISPUTED: "bg-red-100 text-red-700",
+  REFUNDED: "bg-gray-100 text-gray-600",
+  AUTO_RELEASED: "bg-purple-100 text-purple-700",
+};
+
+// What the buyer sees as the status label
+const statusLabels: Record<string, string> = {
+  PENDING: "Pending Payment",
+  PAID: "Paid · Waiting for farmer",
+  RECEIVED: "Farmer received your order",
+  SHIPPED: "Order shipped · Confirm delivery",
+  DELIVERED: "Order shipped · Confirm delivery",
+  CONFIRMED: "Completed",
+  CANCELLED: "Cancelled",
+  DISPUTED: "Disputed",
+  REFUNDED: "Refunded",
+  AUTO_RELEASED: "Completed",
 };
 
 // ── Stripe Checkout Form ─────────────────────────────────────
@@ -110,11 +131,13 @@ const BuyerOrdersPage = () => {
 
   const orders = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
 
-  const [payingOrder, setPayingOrder] = useState<{ id: string; amount: number } | null>(null);
+  const [payingOrder, setPayingOrder] = useState<{ id: string; amount: number; farmerPhone: string } | null>(null);
   const [payStep, setPayStep] = useState<PayStep>("options");
   const [mpesaPhone, setMpesaPhone] = useState("");
+  const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
 
   const [initiateMpesaPayment, { isLoading: isMpesaLoading }] = useInitiateMpesaPaymentMutation();
+  const [confirmOrderReceived, { isLoading: isConfirming }] = useConfirmOrderReceivedMutation();
 
   const handleClosePayment = () => {
     setPayingOrder(null);
@@ -130,6 +153,7 @@ const BuyerOrdersPage = () => {
         phone: mpesaPhone,
         amount: payingOrder.amount,
         orderId: payingOrder.id,
+        farmerPhone: payingOrder.farmerPhone,
       }).unwrap();
       setPayStep("mpesa-pending");
     } catch (err: any) {
@@ -137,10 +161,28 @@ const BuyerOrdersPage = () => {
     }
   };
 
+  // Buyer confirms they physically received the order — triggers payment release
+  const handleConfirmDelivered = async (orderId: string) => {
+    const confirmed = window.confirm(
+      "Confirm that you have received your order? This will release payment to the farmer."
+    );
+    if (!confirmed) return;
+    setConfirmingOrderId(orderId);
+    try {
+      await confirmOrderReceived(orderId).unwrap();
+      refetch();
+      alert("✅ Delivery confirmed! Payment has been released to the farmer.");
+    } catch (err: any) {
+      alert(err?.data?.error || err?.message || "Failed to confirm delivery");
+    } finally {
+      setConfirmingOrderId(null);
+    }
+  };
+
   const handlePaymentSuccess = () => {
     handleClosePayment();
     refetch();
-    alert("Payment successful! Your order has been confirmed.");
+    alert("Payment successful! Your order is now being processed.");
   };
 
   if (isLoading) return <div className="text-center py-20 text-gray-400">Loading orders...</div>;
@@ -166,60 +208,132 @@ const BuyerOrdersPage = () => {
       </div>
 
       <div className="space-y-4">
-        {orders.map((order: any) => (
-          <div key={order.id} className="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md transition">
+        {orders.map((order: any) => {
+          const farmerPhone = order.items?.[0]?.listing?.farmer?.phone ?? "";
+          const isPaid = ["PAID", "RECEIVED", "SHIPPED", "CONFIRMED", "AUTO_RELEASED"].includes(order.status);
 
-            {/* Order Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-xs text-gray-400">Order ID</p>
-                <p className="font-mono text-sm font-semibold text-gray-700">#{order.id}</p>
-              </div>
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColors[order.status] ?? "bg-gray-100 text-gray-600"}`}>
-                {order.status}
-              </span>
-            </div>
+          return (
+            <div key={order.id} className="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md transition">
 
-            {/* Order Items */}
-            <div className="space-y-3 mb-4">
-              {order.items?.map((item: any) => (
-                <div key={item.id} className="flex items-center gap-3">
-                  {item.listing?.crop?.cropUrl ? (
-                    <img src={item.listing.crop.cropUrl} alt={item.listing.crop.name} className="w-12 h-12 rounded-lg object-cover" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center">
-                      <ShoppingBag size={20} className="text-green-300" />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-800 text-sm">{item.listing?.crop?.name ?? "Unknown Crop"}</p>
-                    <p className="text-xs text-gray-500">Farmer: {item.listing?.farmer?.fullName ?? "—"}</p>
-                    <p className="text-xs text-gray-500">Qty: {item.quantity} {item.listing?.crop?.unit ?? "kg"} · KES {Number(item.price).toLocaleString()}</p>
-                  </div>
+              {/* Order Header */}
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <div>
+                  <p className="text-xs text-gray-400">Order ID</p>
+                  <p className="font-mono text-sm font-semibold text-gray-700">#{order.id.slice(0, 8)}...</p>
                 </div>
-              ))}
-            </div>
-
-            {/* Order Footer */}
-            <div className="flex items-center justify-between pt-3 border-t">
-              <div>
-                <p className="text-xs text-gray-400">
-                  {new Date(order.createdAt).toLocaleDateString("en-KE", { year: "numeric", month: "short", day: "numeric" })}
-                </p>
-                <p className="font-bold text-green-700 mt-0.5">Total: KES {Number(order.totalAmount).toLocaleString()}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColors[order.status] ?? "bg-gray-100 text-gray-600"}`}>
+                    {statusLabels[order.status] ?? order.status}
+                  </span>
+                  {/* Paid indicator shown alongside status when order is paid */}
+                  {isPaid && (
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700 flex items-center gap-1">
+                      <CheckCircle size={11} /> Paid
+                    </span>
+                  )}
+                </div>
               </div>
-              {/* ✅ Pay Now button — only for PENDING orders */}
-              {order.status === "PENDING" && (
-                <button
-                  onClick={() => { setPayingOrder({ id: order.id, amount: Number(order.totalAmount) }); setPayStep("options"); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition"
-                >
-                  Pay Now
-                </button>
+
+              {/* Order Items */}
+              <div className="space-y-3 mb-4">
+                {order.items?.map((item: any) => (
+                  <div key={item.id} className="flex items-center gap-3">
+                    {item.listing?.crop?.cropUrl ? (
+                      <img src={item.listing.crop.cropUrl} alt={item.listing.crop.name} className="w-12 h-12 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center">
+                        <ShoppingBag size={20} className="text-green-300" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-800 text-sm">{item.listing?.crop?.name ?? "Unknown Crop"}</p>
+                      <p className="text-xs text-gray-500">Farmer: {item.listing?.farmer?.fullName ?? "—"}</p>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity} {item.listing?.crop?.unit ?? "kg"} · KES {Number(item.price).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Status banners */}
+              {order.status === "RECEIVED" && (
+                <div className="mb-3 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <PackageCheck size={14} className="text-indigo-500 shrink-0" />
+                  <p className="text-xs text-indigo-700">
+                    The farmer has acknowledged your order and is preparing it for dispatch.
+                  </p>
+                </div>
               )}
+
+              {(order.status === "SHIPPED" || order.status === "DELIVERED") && (
+                <div className="mb-3 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <Truck size={14} className="text-orange-500 shrink-0" />
+                  <p className="text-xs text-orange-700">
+                    Your order is on its way! Once you receive it, tap <span className="font-semibold">Confirm Delivered</span> to release payment to the farmer.
+                  </p>
+                </div>
+              )}
+
+              {(order.status === "SHIPPED" || order.status === "DELIVERED") && order.autoReleaseAt && (
+                <div className="mb-3 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <Clock size={14} className="text-yellow-600 shrink-0" />
+                  <p className="text-xs text-yellow-700">
+                    Payment auto-releases on{" "}
+                    <span className="font-semibold">
+                      {new Date(order.autoReleaseAt).toLocaleDateString("en-KE", {
+                        month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                      })}
+                    </span>{" "}
+                    if you don't confirm delivery.
+                  </p>
+                </div>
+              )}
+
+              {/* Order Footer */}
+              <div className="flex items-center justify-between pt-3 border-t flex-wrap gap-3">
+                <div>
+                  <p className="text-xs text-gray-400">
+                    {new Date(order.createdAt).toLocaleDateString("en-KE", { year: "numeric", month: "short", day: "numeric" })}
+                  </p>
+                  <p className="font-bold text-green-700 mt-0.5">Total: KES {Number(order.totalAmount).toLocaleString()}</p>
+                </div>
+
+                <div className="flex gap-2 flex-wrap items-center">
+                  {/* Pay Now — PENDING orders only */}
+                  {order.status === "PENDING" && (
+                    <button
+                      onClick={() => {
+                        setPayingOrder({ id: order.id, amount: Number(order.totalAmount), farmerPhone });
+                        setPayStep("options");
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition"
+                    >
+                      Pay Now
+                    </button>
+                  )}
+
+                  {/* Confirm Delivered — shown when farmer has shipped or marked delivered */}
+                  {(order.status === "SHIPPED" || order.status === "DELIVERED") && (
+                    <button
+                      onClick={() => handleConfirmDelivered(order.id)}
+                      disabled={isConfirming && confirmingOrderId === order.id}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition disabled:opacity-60"
+                    >
+                      <CheckCircle size={15} />
+                      {isConfirming && confirmingOrderId === order.id ? "Confirming..." : "Confirm Delivered"}
+                    </button>
+                  )}
+
+                  {/* Completed */}
+                  {(order.status === "CONFIRMED" || order.status === "AUTO_RELEASED") && (
+                    <span className="flex items-center gap-1 text-xs text-green-600 font-semibold">
+                      <CheckCircle size={14} /> Order Complete
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── Payment Modal ── */}
@@ -247,19 +361,24 @@ const BuyerOrdersPage = () => {
               </div>
             )}
 
-            {/* ── Options ── */}
+            {/* Escrow notice */}
+            {payStep === "options" && (
+              <div className="mb-4 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+                <p className="text-xs text-blue-700">
+                  🔒 <span className="font-semibold">Secure Escrow:</span> Your payment is held safely until you confirm receipt of your order.
+                </p>
+              </div>
+            )}
+
+            {/* Options */}
             {payStep === "options" && (
               <div className="flex flex-col gap-3">
-                <button
-                  onClick={() => setPayStep("stripe")}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-                >
+                <button onClick={() => setPayStep("stripe")}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
                   <CreditCard size={18} /> Pay with Card (Stripe)
                 </button>
-                <button
-                  onClick={() => setPayStep("mpesa-phone")}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition"
-                >
+                <button onClick={() => setPayStep("mpesa-phone")}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition">
                   🇰🇪 Pay with M-Pesa
                 </button>
                 <button onClick={handleClosePayment} className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition">
@@ -268,7 +387,7 @@ const BuyerOrdersPage = () => {
               </div>
             )}
 
-            {/* ── Stripe ── */}
+            {/* Stripe */}
             {payStep === "stripe" && (
               <Elements stripe={stripePromise}>
                 <CheckoutForm
@@ -280,7 +399,7 @@ const BuyerOrdersPage = () => {
               </Elements>
             )}
 
-            {/* ── M-Pesa phone ── */}
+            {/* M-Pesa phone */}
             {payStep === "mpesa-phone" && (
               <>
                 <p className="text-sm text-gray-600 font-medium mb-3">Enter your M-Pesa phone number:</p>
@@ -295,26 +414,26 @@ const BuyerOrdersPage = () => {
                   <button onClick={() => setPayStep("options")} className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     ← Back
                   </button>
-                  <button
-                    onClick={handleMpesaPay}
-                    disabled={isMpesaLoading || !mpesaPhone}
-                    className="flex-1 py-2.5 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition disabled:opacity-60"
-                  >
+                  <button onClick={handleMpesaPay} disabled={isMpesaLoading || !mpesaPhone}
+                    className="flex-1 py-2.5 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition disabled:opacity-60">
                     {isMpesaLoading ? "Sending..." : "Send STK Push"}
                   </button>
                 </div>
               </>
             )}
 
-            {/* ── M-Pesa pending ── */}
+            {/* M-Pesa pending */}
             {payStep === "mpesa-pending" && (
               <div className="text-center py-4">
                 <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">📱</span>
                 </div>
                 <h3 className="font-bold text-gray-800 mb-2">Check your phone!</h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-gray-500 mb-2">
                   An M-Pesa prompt has been sent to <span className="font-semibold">{mpesaPhone}</span>. Enter your PIN to complete payment.
+                </p>
+                <p className="text-xs text-blue-600 mb-4">
+                  🔒 Your payment will be held securely until you confirm receipt of your order.
                 </p>
                 <div className="flex flex-col gap-2">
                   <button onClick={handleClosePayment} className="w-full py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition">

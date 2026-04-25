@@ -23,23 +23,25 @@ const Login = () => {
 
     try {
       const res = await loginUser(data).unwrap();
-      
 
-     
+
+
       dispatch(
         setCredentials({
           token: res.token,
           userId: res.user.userId,
           email: res.user.email,
-          fullName: res.user.fullName, 
-          role: res.user.role, 
+          fullName: res.user.fullName,
+          role: res.user.role,
         })
       );
 
       toast.success("Login successful", { id: loadingId });
 
-      //  Redirect to dashboard based on role
-      if (res.user.role === "FARMER") {
+      // Redirect to dashboard based on role
+      if (res.user.role === "ADMIN") {
+        navigate("/admin");
+      } else if (res.user.role === "FARMER") {
         navigate("/farmer-dashboard");
       } else {
         navigate("/dashboard/me");

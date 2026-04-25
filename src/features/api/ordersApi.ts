@@ -29,7 +29,7 @@ export const ordersApi = createApi({
       query: (payload) => ({
         url: "/orders",
         method: "POST",
-        body: payload, // { buyerId, totalAmount, items: [{ listingId, quantity, price }] }
+        body: payload,
       }),
       invalidatesTags: ["orders"],
     }),
@@ -52,6 +52,24 @@ export const ordersApi = createApi({
       }),
       invalidatesTags: ["orders"],
     }),
+
+    // FARMER MARKS ORDER AS DELIVERED
+    markOrderDelivered: builder.mutation({
+      query: (id) => ({
+        url: `/orders/${id}/deliver`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["orders"],
+    }),
+
+    // BUYER CONFIRMS RECEIPT → TRIGGERS B2C PAYOUT TO FARMER
+    confirmOrderReceived: builder.mutation({
+      query: (id) => ({
+        url: `/orders/${id}/confirm`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["orders"],
+    }),
   }),
 });
 
@@ -62,4 +80,6 @@ export const {
   useCreateOrderMutation,
   useUpdateOrderMutation,
   useDeleteOrderMutation,
+  useMarkOrderDeliveredMutation,
+  useConfirmOrderReceivedMutation,
 } = ordersApi;

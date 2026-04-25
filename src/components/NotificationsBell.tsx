@@ -30,6 +30,7 @@ const NotificationBell = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
   const userId = user?.userId;
+console.log("Fetching notifications for userId:", userId);
 
   const [isOpen, setIsOpen] = useState(false);
 

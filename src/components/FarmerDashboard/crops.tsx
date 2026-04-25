@@ -166,9 +166,9 @@ const Crops = () => {
               )}
               <div className="p-4">
                 <h3 className="font-bold text-gray-900">{crop.name}</h3>
-               <p className="text-sm text-gray-500">
-  {crop.category} · {normalizeToKg(crop.quantity, crop.unit)} kg
-</p>
+                <p className="text-sm text-gray-500">
+                  {crop.category} · {normalizeToKg(crop.quantity, crop.unit)} kg
+                </p>
                 <div className="flex gap-2 mt-3">
                   <button
                     onClick={() => openEditCrop(crop)}
@@ -269,23 +269,23 @@ const Crops = () => {
               </div>
 
               {/* Unit */}
-<div>
-  <label className="block text-sm font-medium text-gray-700">Unit</label>
-  <select
-    className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
-    {...cropForm.register("unit", { required: "Unit is required" })}
-  >
-    <option value="">Select unit</option>
-    {allowedUnits.map((unit) => (
-      <option key={unit} value={unit}>
-        {unit}
-      </option>
-    ))}
-  </select>
-  {cropForm.formState.errors.unit && (
-    <p className="text-red-600 text-sm mt-1">{cropForm.formState.errors.unit.message}</p>
-  )}
-</div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Unit</label>
+                <select
+                  className="mt-1 w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  {...cropForm.register("unit", { required: "Unit is required" })}
+                >
+                  <option value="">Select unit</option>
+                  {allowedUnits.map((unit) => (
+                    <option key={unit} value={unit}>
+                      {unit}
+                    </option>
+                  ))}
+                </select>
+                {cropForm.formState.errors.unit && (
+                  <p className="text-red-600 text-sm mt-1">{cropForm.formState.errors.unit.message}</p>
+                )}
+              </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
