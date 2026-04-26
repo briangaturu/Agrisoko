@@ -18,8 +18,18 @@ const Header = () => {
 
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
 
-  const dashboardPath = user?.role === "FARMER" ? "/farmer-dashboard" : "/dashboard/me";
-  const dashboardLabel = user?.role === "FARMER" ? "Farmer Dashboard" : "User Dashboard";
+  const dashboardPath =
+    user?.role === "ADMIN"
+      ? "/admin"
+      : user?.role === "FARMER"
+        ? "/farmer-dashboard"
+        : "/dashboard/me";
+  const dashboardLabel =
+    user?.role === "ADMIN"
+      ? "Admin Dashboard"
+      : user?.role === "FARMER"
+        ? "Farmer Dashboard"
+        : "User Dashboard";
   const displayName = user?.fullName || user?.email || "User";
 
   const handleLogout = () => {
@@ -60,50 +70,7 @@ const Header = () => {
               Contact
             </NavLink>
 
-            {isAuthenticated ? (
-              <div className="relative ml-2">
-                <button
-                  type="button"
-                  onClick={() => setUserMenuOpen((v) => !v)}
-                  className="px-4 py-2 rounded-md bg-green-50 text-green-800 text-sm font-semibold border border-green-200 flex items-center gap-2 hover:bg-green-100 transition"
-                >
-                  <span>Hello, {displayName}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {userMenuOpen && (
-                  <>
-                    <button
-                      className="fixed inset-0 z-40 cursor-default"
-                      onClick={() => setUserMenuOpen(false)}
-                      aria-label="Close menu"
-                    />
-                    <div className="absolute right-0 mt-2 w-52 bg-white border rounded-lg shadow-lg z-50 overflow-hidden">
-                      <Link
-                        to={dashboardPath}
-                        onClick={() => setUserMenuOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50"
-                      >
-                        {dashboardLabel}
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
+            {!isAuthenticated && (
               <div className="flex items-center gap-2 ml-2">
                 <Link
                   to="/login"
@@ -122,8 +89,53 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-2 ml-2">
-            {isAuthenticated && <NotificationBell />}
-            <div className="relative">{/* ... existing dropdown ... */}</div>
+            {isAuthenticated && (
+              <>
+                <NotificationBell />
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setUserMenuOpen((v) => !v)}
+                    className="px-4 py-2 rounded-md bg-green-50 text-green-800 text-sm font-semibold border border-green-200 flex items-center gap-2 hover:bg-green-100 transition"
+                  >
+                    <span>Hello, {displayName}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {userMenuOpen && (
+                    <>
+                      <button
+                        className="fixed inset-0 z-40 cursor-default"
+                        onClick={() => setUserMenuOpen(false)}
+                        aria-label="Close menu"
+                      />
+                      <div className="absolute right-0 mt-2 w-52 bg-white border rounded-lg shadow-lg z-50 overflow-hidden">
+                        <Link
+                          to={dashboardPath}
+                          onClick={() => setUserMenuOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50"
+                        >
+                          {dashboardLabel}
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Mobile Toggle */}

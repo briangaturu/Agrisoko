@@ -27,13 +27,13 @@ import Orders from "./components/FarmerDashboard/orders";
 
 // Admin
 import AdminLayout from "./dashboardDesign/adminLayout";
-import Analytics from "./adminDashboard/analytics";
-import AdminUsers from "./adminDashboard/users";
-import AdminOrders from "./adminDashboard/orders";
-import AdminCrops from "./adminDashboard/crops";
-import AdminListings from "./adminDashboard/listings";
-import AdminPayments from "./adminDashboard/payments";
-import Wallet from "./adminDashboard/wallet";
+import Analytics from "./components/adminDashboard/analytics";
+import AdminUsers from "./components/adminDashboard/users";
+import AdminOrders from "./components/adminDashboard/orders";
+import AdminCrops from "./components/adminDashboard/crops";
+import AdminListings from "./components/adminDashboard/listings";
+import AdminPayments from "./components/adminDashboard/payments";
+import Wallet from "./components/adminDashboard/wallet";
 
 
 const App = () => {

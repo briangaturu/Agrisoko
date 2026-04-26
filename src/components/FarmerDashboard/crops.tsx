@@ -4,6 +4,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { Wheat, Plus, Pencil, Trash2, ImagePlus, X } from "lucide-react";
 import { FaTimes } from "react-icons/fa";
 import { SaveIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 import {
   useGetCropsQuery,
@@ -25,6 +26,8 @@ interface CropFormValues {
 const Crops = () => {
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [editingCrop, setEditingCrop] = useState<any>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [cropToDelete, setCropToDelete] = useState<any>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -104,18 +107,27 @@ const Crops = () => {
       setIsCropModalOpen(false);
       clearImage();
     } catch (err: any) {
-      alert(err?.data?.error || err?.message || "Failed to save crop");
+      toast.error(err?.data?.error || err?.message || "Failed to save crop");
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleDeleteCrop = async (id: string) => {
-    if (!confirm("Delete this crop?")) return;
+  const handleDeleteClick = (crop: any) => {
+    setCropToDelete(crop);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    const id = cropToDelete?.id ?? cropToDelete?._id;
+    if (!id) return;
     try {
       await deleteCrop(id).unwrap();
+      toast.success("Crop deleted successfully!");
+      setIsDeleteModalOpen(false);
+      setCropToDelete(null);
     } catch {
-      alert("Failed to delete crop");
+      toast.error("Failed to delete crop");
     }
   };
 
@@ -177,7 +189,7 @@ const Crops = () => {
                     <Pencil size={14} /> Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteCrop(crop.id ?? crop._id)}
+                    onClick={() => handleDeleteClick(crop)}
                     className="flex-1 flex items-center justify-center gap-1 py-1.5 text-sm bg-red-50 hover:bg-red-100 rounded-md transition font-medium text-red-600"
                   >
                     <Trash2 size={14} /> Delete
@@ -191,8 +203,8 @@ const Crops = () => {
 
       {/* Crop Modal */}
       {isCropModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50">
-          <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center px-4 py-6 z-50 overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-bold text-green-700">
                 {editingCrop ? "Edit Crop" : "Add Crop"}
@@ -304,6 +316,37 @@ const Crops = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {isDeleteModalOpen && cropToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center px-4 py-6 z-50 overflow-y-auto">
+          <div className="w-full max-w-sm bg-white rounded-xl shadow-lg p-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Confirm Delete</h2>
+            <p className="text-sm text-gray-700 mb-6">
+              Are you sure you want to delete <span className="font-semibold">{cropToDelete.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setCropToDelete(null);
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm font-medium"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
