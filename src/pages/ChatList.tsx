@@ -77,7 +77,6 @@ const ChatList = () => {
     fetchConversations();
 
     // Setup socket for real-time updates
-    const token = localStorage.getItem("token");
     const socket = io(SOCKET_URL, {
       transports: ["websocket"],
       autoConnect: false,

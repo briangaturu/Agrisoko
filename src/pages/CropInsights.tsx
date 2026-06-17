@@ -1,26 +1,26 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  TrendingUp, Cloud, Sprout, Calendar, MapPin, AlertTriangle,
+  TrendingUp, Cloud, Sprout, Calendar, MapPin,
 } from "lucide-react";
 
 import AIInsightCard   from "../components/Insights/AIInsightsCard";
 import PricesTab       from "../components/Insights/pricesTab";
 import WeatherTab      from "../components/Insights/weatherTab";
-import DiseaseTab      from "../components/Insights/DiseaseTab";
+// import DiseaseTab      from "../components/Insights/DiseaseTab";
 import TipsTab         from "../components/Insights/TipsTab";
 import CalendarTab     from "../components/Insights/calendarTab";
 import AvailabilityTab from "../components/Insights/AvailabilityTab";
 import { type AIInsight } from "../components/Insights/constants";
 import Header from "../components/Header";
 
-const API_BASE = "http://localhost:5000/api/external";
+const API_BASE = (import.meta.env.VITE_EXTERNAL_API_BASE as string) || "http://localhost:5000/api/external";
 
 type Tab = "prices" | "weather" | "tips" | "calendar" | "availability" | "disease";
 
 const TABS = [
   { key: "prices",       label: "Prices",       icon: TrendingUp    },
   { key: "weather",      label: "Weather",      icon: Cloud         },
-  { key: "disease",      label: "Disease",      icon: AlertTriangle },
+  // { key: "disease",      label: "Disease",      icon: AlertTriangle },
   { key: "tips",         label: "Tips",         icon: Sprout        },
   { key: "calendar",     label: "Calendar",     icon: Calendar      },
   { key: "availability", label: "Find Produce", icon: MapPin        },
@@ -33,6 +33,41 @@ const CropInsights = () => {
   const [aiLoading,    setAiLoading]    = useState(false);
   const [aiError,      setAiError]      = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const parseResponse = (text: string) => {
+    try {
+      return text ? JSON.parse(text) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const extractAIInsight = (payload: any, cropName: string): AIInsight => {
+    const source = payload?.data ?? payload;
+
+    if (source && typeof source === "object" && typeof source.title === "string" && typeof source.body === "string") {
+      return {
+        title: source.title,
+        body: source.body,
+      };
+    }
+
+    if (source && typeof source === "object" && typeof source.insight === "string") {
+      return {
+        title: `${cropName} Insight`,
+        body: source.insight,
+      };
+    }
+
+    if (typeof source === "string") {
+      return {
+        title: `${cropName} Insight`,
+        body: source,
+      };
+    }
+
+    throw new Error("Unexpected AI insight response format.");
+  };
 
   // ── Fetch AI insight from backend ──────────────────────────────────────────
   const fetchAIInsight = async (crop: string) => {
@@ -50,15 +85,15 @@ const CropInsights = () => {
         signal:  abortRef.current.signal,
         body:    JSON.stringify({ crop }),
       });
+      const text = await res.text();
+      const data = parseResponse(text);
 
-      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "AI insight failed");
 
-      if (!res.ok) throw new Error(data.error || "AI insight failed");
-
-      setAiInsight(data);
+      setAiInsight(extractAIInsight(data, crop));
     } catch (err: any) {
       if (err.name !== "AbortError") {
-        setAiError("Failed to load AI insight. Please try again.");
+        setAiError(err.message || "Failed to load AI insight. Please try again.");
       }
     } finally {
       setAiLoading(false);
@@ -131,7 +166,7 @@ const CropInsights = () => {
 
         {activeTab === "prices"       && <PricesTab       selectedCrop={selectedCrop} onSelectCrop={setSelectedCrop} />}
         {activeTab === "weather"      && <WeatherTab />}
-        {activeTab === "disease"      && <DiseaseTab />}
+        {/* {activeTab === "disease"      && <DiseaseTab />} */}
         {activeTab === "tips"         && <TipsTab         selectedCrop={selectedCrop} aiInsight={aiInsight} aiLoading={aiLoading} onSelectCrop={setSelectedCrop} />}
         {activeTab === "calendar"     && <CalendarTab />}
         {activeTab === "availability" && <AvailabilityTab />}

@@ -1,6 +1,6 @@
 // src/components/Marketplace/CropCard.tsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { MapPin, CreditCard } from "lucide-react";
 import { useSelector } from "react-redux";
 import { FaTimes } from "react-icons/fa";

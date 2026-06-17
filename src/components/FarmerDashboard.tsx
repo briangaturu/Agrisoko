@@ -12,7 +12,7 @@ const FarmerDashboard = () => {
 
   const { data: cropsRes, isLoading: isLoadingCrops } = useGetCropsQuery(undefined);
   const { data: ordersRes, isLoading: isLoadingOrders } = useGetOrdersQuery(undefined);
-  const { data: paymentsRes, isLoading: isLoadingPayments } = useGetPaymentsQuery(undefined);
+  useGetPaymentsQuery(undefined);
 
   // ── Crops ──────────────────────────────────────────────────
   const allCrops = cropsRes?.data ?? cropsRes ?? [];
@@ -31,10 +31,6 @@ const FarmerDashboard = () => {
   const completedOrders = farmerOrders.filter((o: any) => ["CONFIRMED", "AUTO_RELEASED"].includes(o.status)).length;
 
   // ── Payments (for this farmer's orders) ───────────────────
-  const farmerOrderIds = new Set(farmerOrders.map((o: any) => o.id));
-  const allPayments = Array.isArray(paymentsRes?.data) ? paymentsRes.data : Array.isArray(paymentsRes) ? paymentsRes : [];
-  const farmerPayments = allPayments.filter((p: any) => farmerOrderIds.has(p.orderId));
-
   const totalEarned = farmerOrders
     .filter((o: any) => ["CONFIRMED", "AUTO_RELEASED"].includes(o.status))
     .reduce((sum: number, o: any) => sum + Number(o.farmerAmount ?? o.totalAmount ?? 0), 0);

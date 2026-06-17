@@ -1,12 +1,14 @@
 // src/components/Marketplace/MarketplaceGrid.tsx
 import CropCard from "./CropCard";
-import { useGetListingsQuery } from "../../features/api/listingsApi";
+import { type Listing } from "../Insights/constants";
 
-const MarketplaceGrid = () => {
-  const { data, isLoading, isError } = useGetListingsQuery(undefined);
+interface MarketplaceGridProps {
+  listings: Listing[];
+  isLoading: boolean;
+  isError: boolean;
+}
 
-  const listings = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
-console.log("listing sample:", listings[0]);
+const MarketplaceGrid = ({ listings, isLoading, isError }: MarketplaceGridProps) => {
   if (isLoading) {
     return <p className="text-center py-10">Loading crops...</p>;
   }
@@ -29,7 +31,7 @@ console.log("listing sample:", listings[0]);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {listings.map((listing: any) => (
+      {listings.map((listing) => (
        <CropCard
   key={listing.id}
   listingId={listing.id}       

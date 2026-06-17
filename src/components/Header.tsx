@@ -29,7 +29,7 @@ const Header = () => {
       ? "Admin Dashboard"
       : user?.role === "FARMER"
         ? "Farmer Dashboard"
-        : "User Dashboard";
+        : "Buyer Dashboard";
   const displayName = user?.fullName || user?.email || "User";
 
   const handleLogout = () => {

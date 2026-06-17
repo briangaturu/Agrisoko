@@ -1,10 +1,23 @@
 // src/components/Marketplace/MarketplaceFilters.tsx
-import { useState } from "react";
+interface MarketplaceFiltersProps {
+  cropType: string;
+  location: string;
+  maxPrice: string;
+  onCropTypeChange: (value: string) => void;
+  onLocationChange: (value: string) => void;
+  onMaxPriceChange: (value: string) => void;
+  onReset: () => void;
+}
 
-const MarketplaceFilters = () => {
-  const [cropType, setCropType] = useState("");
-  const [location, setLocation] = useState("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+const MarketplaceFilters = ({
+  cropType,
+  location,
+  maxPrice,
+  onCropTypeChange,
+  onLocationChange,
+  onMaxPriceChange,
+  onReset,
+}: MarketplaceFiltersProps) => {
 
   return (
     <div className="w-full mb-6">
@@ -26,7 +39,7 @@ const MarketplaceFilters = () => {
             type="text"
             placeholder="e.g. Tomatoes"
             value={cropType}
-            onChange={(e) => setCropType(e.target.value)}
+            onChange={(e) => onCropTypeChange(e.target.value)}
             className="px-3 py-2 border border-green-200 rounded-md text-sm
             focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
             transition"
@@ -42,7 +55,7 @@ const MarketplaceFilters = () => {
             type="text"
             placeholder="e.g. Kiambu"
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={(e) => onLocationChange(e.target.value)}
             className="px-3 py-2 border border-green-200 rounded-md text-sm
             focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
             transition"
@@ -56,23 +69,24 @@ const MarketplaceFilters = () => {
           </label>
           <input
             type="number"
-            value={priceRange[1]}
-            onChange={(e) =>
-              setPriceRange([priceRange[0], Number(e.target.value)])
-            }
+            min={0}
+            placeholder="e.g. 200"
+            value={maxPrice}
+            onChange={(e) => onMaxPriceChange(e.target.value)}
             className="px-3 py-2 border border-green-200 rounded-md text-sm
             focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
             transition"
           />
         </div>
 
-        {/* Button */}
-        <div className="w-full md:w-auto">
+        {/* Reset Button */}
+        <div className="w-full md:w-auto md:ml-auto">
           <button
-            className="w-full md:w-auto px-4 py-2 bg-green-600 text-white rounded-md font-semibold
-            hover:bg-green-700 active:scale-[0.98] transition text-sm"
+            onClick={onReset}
+            className="w-full md:w-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-md font-semibold
+            hover:bg-gray-300 active:scale-[0.98] transition text-sm"
           >
-            Apply Filters
+            Reset Filters
           </button>
         </div>
 

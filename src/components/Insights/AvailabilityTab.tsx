@@ -24,6 +24,8 @@ const AvailabilityTab = () => {
   const currentMonth = new Date().getMonth();
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
   const [searchCrop, setSearchCrop]       = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [expandedCrop, setExpandedCrop]   = useState<string | null>(null);
 
   const { data, isLoading } = useGetListingsQuery(undefined);
@@ -34,9 +36,23 @@ const AvailabilityTab = () => {
     : [];
 
   const produceByMonth: ProduceLocation[] = (() => {
+    const normalizedSearch = searchCrop.trim().toLowerCase();
+    const normalizedLocation = locationFilter.trim().toLowerCase();
+    const parsedMaxPrice = Number(maxPrice);
+    const hasValidMaxPrice = maxPrice.trim().length > 0 && !Number.isNaN(parsedMaxPrice);
+
     const filtered = listings.filter((l) => {
       const month = new Date(l.createdAt).getMonth();
-      return month === selectedMonth && l.status === "ACTIVE";
+      const cropName = l.crop?.name?.toLowerCase() ?? "";
+      const listingLocation = l.location?.toLowerCase() ?? "";
+      const listingPrice = Number(l.pricePerUnit);
+
+      if (month !== selectedMonth || l.status !== "ACTIVE") return false;
+      if (normalizedSearch && !cropName.includes(normalizedSearch)) return false;
+      if (normalizedLocation && !listingLocation.includes(normalizedLocation)) return false;
+      if (hasValidMaxPrice && listingPrice > parsedMaxPrice) return false;
+
+      return true;
     });
     const grouped: Record<string, ProduceLocation> = {};
     filtered.forEach((listing) => {
@@ -58,9 +74,7 @@ const AvailabilityTab = () => {
         listingId: listing.id,
       });
     });
-    return Object.values(grouped).filter((p) =>
-      p.cropName.toLowerCase().includes(searchCrop.toLowerCase())
-    );
+    return Object.values(grouped);
   })();
 
   return (
@@ -97,16 +111,47 @@ const AvailabilityTab = () => {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      {/* Search + Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="relative md:col-span-2">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search produce (e.g. Maize, Tomatoes...)"
+            value={searchCrop}
+            onChange={(e) => setSearchCrop(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm"
+          />
+        </div>
+
         <input
           type="text"
-          placeholder="Search produce (e.g. Maize, Tomatoes...)"
-          value={searchCrop}
-          onChange={(e) => setSearchCrop(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm"
+          placeholder="Filter location (e.g. Kiambu)"
+          value={locationFilter}
+          onChange={(e) => setLocationFilter(e.target.value)}
+          className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm"
         />
+
+        <input
+          type="number"
+          min={0}
+          placeholder="Max price (KES)"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+          className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm"
+        />
+
+        <button
+          type="button"
+          onClick={() => {
+            setSearchCrop("");
+            setLocationFilter("");
+            setMaxPrice("");
+          }}
+          className="w-full md:w-auto px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition"
+        >
+          Reset Filters
+        </button>
       </div>
 
       {/* Results */}
@@ -122,8 +167,8 @@ const AvailabilityTab = () => {
             No listings for {MONTHS[selectedMonth]}
           </h3>
           <p className="text-sm text-gray-400">
-            {searchCrop
-              ? `No "${searchCrop}" listings found this month.`
+            {searchCrop || locationFilter || maxPrice
+              ? "No listings match your selected filters for this month."
               : "No farmers have posted listings for this month yet."}
           </p>
         </div>

@@ -39,7 +39,7 @@ const FarmerOrders = () => {
   const farmerId = user?.userId;
 
   const { data, isLoading, isError, refetch } = useGetOrdersQuery(undefined);
-  const [confirmOrderReceived, { isLoading: isConfirming }] = useConfirmOrderReceivedMutation();
+  const [] = useConfirmOrderReceivedMutation();
   const [updateOrder, { isLoading: isUpdating }] = useUpdateOrderMutation();
 
   const [actionOrderId, setActionOrderId] = useState<string | null>(null);

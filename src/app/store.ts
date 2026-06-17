@@ -8,7 +8,7 @@ import { userApi } from "../features/api/userApi";
 import { cropApi } from "../features/api/cropApi";
 import { listingsApi } from "../features/api/listingsApi";
 import { ordersApi } from "../features/api/ordersApi";
-import { paymentsApi } from "../features/api/paymentsApi"; // ✅ add this
+import { paymentsApi } from "../features/api/paymentsApi";
 import { notificationsApi } from "../features/api/notificationsApi";
 import { conversationsApi } from "../features/api/conversationsApi";
 
