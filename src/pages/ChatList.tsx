@@ -31,7 +31,7 @@ interface IncomingMessage {
   isRead: boolean;
 }
 
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = "https://agrisoko-backend-didr.onrender.com";
 
 const ChatList = () => {
   const navigate = useNavigate();

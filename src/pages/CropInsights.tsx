@@ -13,7 +13,7 @@ import AvailabilityTab from "../components/Insights/AvailabilityTab";
 import { type AIInsight } from "../components/Insights/constants";
 import Header from "../components/Header";
 
-const API_BASE = (import.meta.env.VITE_EXTERNAL_API_BASE as string) || "http://localhost:5000/api/external";
+const API_BASE = (import.meta.env.VITE_EXTERNAL_API_BASE as string) || "https://agrisoko-backend-didr.onrender.com/api/external";
 
 type Tab = "prices" | "weather" | "tips" | "calendar" | "availability" | "disease";
 
