@@ -6,7 +6,7 @@ export const cropApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["crops"],
   endpoints: (builder) => ({
-    // ✅ CROPS
+    
 
     // GET ALL CROPS
     getCrops: builder.query({

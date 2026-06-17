@@ -4,7 +4,7 @@ import {
   Loader2, RefreshCw, Search, Wind, Droplets, Thermometer,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:5000/api/external";
+const API_BASE = "https://agrisoko-backend-didr.onrender.com/api/external";
 
 // ── Weather icon ───────────────────────────────────────────────────────────────
 export const WeatherConditionIcon = ({ code, size = 24 }: { code: number; size?: number }) => {

@@ -3,7 +3,7 @@ import { clearCredentials } from "../auth/authSlice";
 
 // Create a base query with automatic token handling
 export const baseQueryWithAuth = fetchBaseQuery({
-  baseUrl: "http://localhost:5000/api",
+  baseUrl: "https://agrisoko-backend-didr.onrender.com/api",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("token");
     if (token) headers.set("authorization", `Bearer ${token}`);

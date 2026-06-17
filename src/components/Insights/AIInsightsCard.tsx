@@ -2,7 +2,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import type { AIInsight, CropPrice } from "./constants";
 import { KENYAN_CROPS } from "./constants";
 
-const API_BASE = "http://localhost:5000/api/external";
+const API_BASE = "https://agrisoko-backend-didr.onrender.com/api/external";
 
 interface Props {
   selectedCrop: string;
