@@ -60,7 +60,7 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3 text-sm">Stay Updated</h3>
+            <h3 className="font-semibold text-gray-900 mb-3 text-sm">#Stay Updated </h3>
             <p className="text-xs text-gray-600 mb-3">
               Subscribe to receive market updates and crop insights.
             </p>
